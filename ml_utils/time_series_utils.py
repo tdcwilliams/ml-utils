@@ -60,6 +60,41 @@ def split_sequence(sequence, n_in=1, n_out=1):
     y = rolling_window(sequence, n_out)[n_in:]
     return x, y
 
+def split_multiple_sequences(sequences, n_steps_in, n_steps_out=None):
+    """
+    Turn sequences into inputs and outputs for a machine learning problem
+
+    Parameters:
+    -----------
+    sequences : list(numpy.ndarray)
+    n_steps : list(int)
+        number of time steps to use as inputs for each sequence
+
+    Returns:
+    --------
+    inputs : list(numpy.ndarray)
+        inputs for ML problem in rows
+    outputs : list(numpy.ndarray)
+        outputs for ML problem in rows
+    """
+    assert(len(sequences)>0)
+    assert(len(sequences) == len(n_steps_in))
+    if n_steps_out is None:
+        n_steps_out = [1 for n in n_steps_in]
+    assert(len(sequences) == len(n_steps_out))
+    inputs = []
+    outputs = []
+    n_samples = np.float32("inf")
+    for seq, n_in, n_out in zip(sequences, n_steps_in, n_steps_out):
+        x, y = split_sequence(seq, n_in=n_in, n_out=n_out)
+        n_samples = int(np.min([x.shape[0], n_samples]))
+        inputs += [x]
+        outputs += [y]
+    return (
+            [x[-n_samples:] for x in inputs],
+            [y[-n_samples:] for y in outputs],
+            )
+
 def split_sequence_lstm(sequence, length, shift=0):
     """
     LSTM's can't handle time series of more than ~200 time steps at once,
