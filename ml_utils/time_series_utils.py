@@ -28,9 +28,12 @@ def rolling_window(a, window_size):
         number of columns is window size
         number of rows is number of times window size can fit into array
     """
-    shape = (a.shape[0] - window_size + 1, window_size) + a.shape[1:]
-    strides = (a.strides[0],) + a.strides
-    return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
+    #make sure array is flat
+    assert(len(a.shape) <= 1 or a.shape[1] ==1)
+    b = a.flatten()
+    shape = (len(b) - window_size + 1, window_size)
+    strides = (b.strides[0],) + b.strides
+    return np.lib.stride_tricks.as_strided(b, shape=shape, strides=strides)
 
 def split_sequence(sequence, n_in=1, n_out=1):
     """
