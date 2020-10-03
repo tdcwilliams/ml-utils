@@ -2,6 +2,13 @@ Build the docker image with:
 ```
 build . -t machine-learning
 ```
+Set some volumes to mount with extra resources
+```
+ML_RESOURCES=()
+ML_RESOURCES+=(-v LOCAL_PATH_1:DOCKER_PATH_1)
+...
+export ML_RESOURCES
+```
 Then build container with:
 ```
 docker container rm -f machine-learning
@@ -10,7 +17,7 @@ docker create -it \
     -e DISPLAY \
     -e QT_X11_NO_MITSHM=1 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v $(pwd):/root/machine-learning \
+    -v $(pwd):/ml-utils ${ML_RESOURCES[@]} \
     --security-opt seccomp=unconfined \
     --cpus 4 \
     --name=machine-learning machine-learning

@@ -1,5 +1,7 @@
 FROM ubuntu:bionic
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONPATH=$PYTHONPATH:/ml-utils
+
 RUN apt-get update \
 &&  apt-get upgrade -y \
 &&  apt-get install -y \
