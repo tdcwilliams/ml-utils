@@ -9,7 +9,7 @@ ML_RESOURCES+=(-v LOCAL_PATH_1:DOCKER_PATH_1)
 ...
 export ML_RESOURCES
 ```
-Then build container with:
+Then build container with (eg.):
 ```
 docker container rm -f machine-learning
 docker create -it \
