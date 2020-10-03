@@ -14,7 +14,74 @@ from scipy.stats import boxcox
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
-def split_series(series, ntest=None, frac=.5):
+def rolling_window(a, window_size):
+    """
+    Parameters:
+    -----------
+    a : numpy.ndarray
+    window_size : int
+        size of the rolling window
+
+    Returns:
+    --------
+    b : numpy.ndarray
+        number of columns is window size
+        number of rows is number of times window size can fit into array
+    """
+    shape = (a.shape[0] - window_size + 1, window_size) + a.shape[1:]
+    strides = (a.strides[0],) + a.strides
+    return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
+
+def split_sequence(sequence, n_in=1, n_out=1):
+    """
+    Turn sequence into inputs and outputs for a machine learning problem
+
+    Parameters:
+    -----------
+    sequence : numpy.ndarray
+    n_in : int
+        number of time steps to use as inputs
+    n_out : int
+        number of time steps to use in outputs
+        n_out=1 gives a one-step forecast
+        n_out>1 gives a multi-step forecast
+
+    Returns:
+    --------
+    x : numpy.ndarray
+        inputs for ML problem in rows
+    y : numpy.ndarray
+        outputs for ML problem in rows
+    """
+    x = rolling_window(sequence, n_in)[:-n_out]
+    y = rolling_window(sequence, n_out)[n_in:]
+    return x, y
+
+def split_sequence_lstm(sequence, length, shift=0):
+    """
+    LSTM's can't handle time series of more than ~200 time steps at once,
+    so we split into shorter samples
+
+    They expect their input to be shaped (n_samples, n_time_steps, n_features)
+
+    Parameters:
+    -----------
+    sequence : numpy.ndarray
+    length : int
+        number of time steps in each sample
+
+    Returns:
+    --------
+    split_seq : numpy.ndarray
+        sequence reshaped to (n_samples, length, 1)
+    """
+    n_in = len(sequence)
+    n_samples = n_in//length
+    n_out = n_samples*length
+    assert(shift + n_out <= n_in)
+    return sequence[shift:shift + n_out].reshape((n_samples, length, 1))
+
+def test_split(series, ntest=None, frac=.5):
     """
     Split series into train and test series
 
