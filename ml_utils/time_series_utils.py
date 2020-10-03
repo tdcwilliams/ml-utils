@@ -16,7 +16,7 @@ from sklearn.metrics import mean_squared_error
 
 def split_series(series, ntest=None, frac=.5):
     """
-    Create a differenced series, usually to give a stationary time series
+    Split series into train and test series
 
     Parameters:
     -----------
