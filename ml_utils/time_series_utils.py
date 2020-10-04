@@ -85,15 +85,25 @@ def split_multiple_sequences(sequences, n_steps_in, n_steps_out=None):
     inputs = []
     outputs = []
     n_samples = np.float32("inf")
+    n_out_max = np.max(n_steps_out)
+    shifts = []
     for seq, n_in, n_out in zip(sequences, n_steps_in, n_steps_out):
         x, y = split_sequence(seq, n_in=n_in, n_out=n_out)
         n_samples = int(np.min([x.shape[0], n_samples]))
+        shifts += [n_out_max - n_out]
         inputs += [x]
         outputs += [y]
-    return (
-            [x[-n_samples:] for x in inputs],
-            [y[-n_samples:] for y in outputs],
-            )
+
+    def subsample(inputs, shifts, n_samples):
+        out = []
+        for x, shift in zip(inputs, shifts):
+            if shift == 0:
+                out += [x[-n_samples:]]
+            else:
+                out += [x[-n_samples-shift: -shift]]
+        return out
+
+    return [subsample(x, shifts, n_samples) for x in [inputs, outputs]]
 
 def split_sequence_lstm(sequence, length, shift=0):
     """
