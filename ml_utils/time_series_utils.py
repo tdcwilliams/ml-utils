@@ -66,7 +66,7 @@ def split_sequence(sequence, n_in=1, n_out=1):
     index : numpy.ndarray
         for a given row in x,y, the corresponding element of index
         is the index in sequence of the first element of the output.
-        This is used for matching inputs and outputs from different time series
+        this is used for matching inputs and outputs from different time series
         in multivariate and dependent time series problems.
     """
     # can't use last "n_out" values since won't be able to give a full forecast for those steps
@@ -76,15 +76,36 @@ def split_sequence(sequence, n_in=1, n_out=1):
     y = rolling_window(sequence[n_in:], n_out)
     return x, y, np.arange(n_in, len(sequence) +1 -n_out)
 
-def split_multiple_sequences(sequences, n_steps_in, n_steps_out=None):
+def match_sequences(sequences, indices, ind_lims):
     """
-    Turn sequences into inputs and outputs for a machine learning problem
+    Parameters:
+    -----------
+    sequences : list(numpy.ndarray)
+        list of sequences to be reduced in order to have their indices overlap
+    indices : list(numpy.ndarray)
+        list of indices for a sequence. For a given row in 'sequence', the corresponding element of index
+        is the index in 'sequence' of the first element of the output.
+    ind_lims : list(int)
+        min and max index for common rows
+    """
+    out = []
+    for x, index in zip(sequences, indices):
+        if x.size == 0:
+            continue
+        out += [x[(index>=ind_lims[0])*(index<=ind_lims[1])]]
+    return out
+
+def split_sequences(sequences, n_steps_in, n_steps_out=None):
+    """
+    Turn list of sequences into inputs and outputs for a machine learning problem
 
     Parameters:
     -----------
     sequences : list(numpy.ndarray)
-    n_steps : list(int)
+    n_steps_in : list(int)
         number of time steps to use as inputs for each sequence
+    n_steps_out : list(int)
+        number of time steps to use as outputs for each sequence
 
     Returns:
     --------
@@ -92,23 +113,35 @@ def split_multiple_sequences(sequences, n_steps_in, n_steps_out=None):
         inputs for ML problem in rows
     outputs : list(numpy.ndarray)
         outputs for ML problem in rows
+    index : numpy.ndarray
+        for a given row in x,y, the corresponding element of index
+        is the index in sequence of the first element of the output.
+        this is used for matching inputs and outputs from different time series
+        in multivariate and dependent time series problems.
     """
     assert(len(sequences)>0)
     assert(len(sequences) == len(n_steps_in))
     if n_steps_out is None:
         n_steps_out = [1 for n in n_steps_in]
     assert(len(sequences) == len(n_steps_out))
+    #split individual sequences to get maximal sets of inputs and outputs
     inputs = []
     outputs = []
-    n_samples = np.float32("inf")
-    n_out_max = np.max(n_steps_out)
-    shifts = []
+    indices = []
+    ind_lims = [np.float32("-inf"), np.float32("inf")]
     for seq, n_in, n_out in zip(sequences, n_steps_in, n_steps_out):
-        x, y = split_sequence(seq, n_in=n_in, n_out=n_out)
-        n_samples = int(np.min([x.shape[0], n_samples]))
-        shifts += [n_out_max - n_out]
+        if n_in + n_out == 0:
+            continue
+        x, y, index = split_sequence(seq, n_in=n_in, n_out=n_out)
+        ind_lims[0] = int(np.max([ind_lims[0], index[0]]))
+        ind_lims[1] = int(np.min([ind_lims[1], index[-1]]))
+        indices += [index]
         inputs += [x]
         outputs += [y]
+    # match the inputs and outputs to restrict the samples to those which are common to all
+    # (have the same index)
+    index = np.arange(ind_lims[0], ind_lims[-1]+1, dtype = int)
+    return [match_sequences(x, indices, ind_lims) for x in [inputs, outputs]] + [index]
 
     def subsample(inputs, shifts, n_samples):
         out = []
