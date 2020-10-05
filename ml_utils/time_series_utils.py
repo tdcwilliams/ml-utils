@@ -28,8 +28,15 @@ def rolling_window(a, window_size):
         number of columns is window size
         number of rows is number of times window size can fit into array
     """
-    #make sure array is flat
+    # make sure array is flat
     assert(len(a.shape) <= 1 or a.shape[1] ==1)
+    n_samples = a.size
+    # special cases
+    if window_size == 0:
+        return np.zeros((n_samples+1,0))
+    if window_size == 1:
+        return a.reshape((n_samples,1))
+    # usual operation
     b = a.flatten()
     shape = (len(b) - window_size + 1, window_size)
     strides = (b.strides[0],) + b.strides
