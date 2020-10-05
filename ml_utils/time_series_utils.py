@@ -45,6 +45,7 @@ def rolling_window(a, window_size):
 def split_sequence(sequence, n_in=1, n_out=1):
     """
     Turn sequence into inputs and outputs for a machine learning problem
+    NB n_in or n_out can be 0: can be used in a dependent time series problem
 
     Parameters:
     -----------
@@ -63,8 +64,11 @@ def split_sequence(sequence, n_in=1, n_out=1):
     y : numpy.ndarray
         outputs for ML problem in rows
     """
-    x = rolling_window(sequence, n_in)[:-n_out]
-    y = rolling_window(sequence, n_out)[n_in:]
+    # can't use last "n_out" values since won't be able to give a full forecast for those steps
+    s = sequence if n_out == 0 else sequence[:-n_out]
+    x = rolling_window(s, n_in)
+    # can't use first "n_in" values since won't be able to get all the required inputs for those steps
+    y = rolling_window(sequence[n_in:], n_out)
     return x, y
 
 def split_multiple_sequences(sequences, n_steps_in, n_steps_out=None):
