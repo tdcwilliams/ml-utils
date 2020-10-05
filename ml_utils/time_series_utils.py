@@ -63,13 +63,18 @@ def split_sequence(sequence, n_in=1, n_out=1):
         inputs for ML problem in rows
     y : numpy.ndarray
         outputs for ML problem in rows
+    index : numpy.ndarray
+        for a given row in x,y, the corresponding element of index
+        is the index in sequence of the first element of the output.
+        This is used for matching inputs and outputs from different time series
+        in multivariate and dependent time series problems.
     """
     # can't use last "n_out" values since won't be able to give a full forecast for those steps
     s = sequence if n_out == 0 else sequence[:-n_out]
     x = rolling_window(s, n_in)
     # can't use first "n_in" values since won't be able to get all the required inputs for those steps
     y = rolling_window(sequence[n_in:], n_out)
-    return x, y
+    return x, y, np.arange(n_in, len(sequence) +1 -n_out)
 
 def split_multiple_sequences(sequences, n_steps_in, n_steps_out=None):
     """
