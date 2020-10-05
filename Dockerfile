@@ -51,6 +51,7 @@ RUN wget https://bootstrap.pypa.io/get-pip.py \
       jupyter \
       matplotlib \
       mock \
+      nose \
       numpy \
       opencv-contrib-python \
       pandas \
