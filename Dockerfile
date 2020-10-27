@@ -14,6 +14,7 @@ RUN apt-get update \
       libatlas-base-dev \
       libavcodec-dev \
       libavformat-dev \
+      libgeos-dev \
       libglu1-mesa  \
       libglu1-mesa-dev \
       libgtk-3-dev \
@@ -22,6 +23,7 @@ RUN apt-get update \
       liblapack-dev \
       libopenblas-dev \
       libpng-dev \
+      libproj-dev \
       libswscale-dev \
       libtiff-dev \
       libv4l-dev \
@@ -44,6 +46,7 @@ RUN wget https://bootstrap.pypa.io/get-pip.py \
 &&  pip install --upgrade pip \
 &&  pip install \
       beautifulsoup4 \
+      cython \
       dlib \
       graphviz \
       imutils \
@@ -57,13 +60,28 @@ RUN wget https://bootstrap.pypa.io/get-pip.py \
       pandas \
       pillow \
       progressbar2 \
+      proj \
       pydotplus \
+      pyproj \
       pyyaml \
       scikit-image \
       scikit-learn \
       seaborn \
       shapely \
       statsmodels \
-      tensorflow==2.0.0
+      tensorflow==2.0.0 \
+&&  pip install \
+      bottleneck \
+      cartopy \
+      dask \
+      nc-time-axis \
+      netCDF4 \
+      numbagg \
+      shapely --no-binary shapely \
+      tlz \
+      zarr \
+&&  pip install \
+      xarray \
+      eofs
 
 WORKDIR /root
