@@ -73,7 +73,7 @@ RUN wget https://bootstrap.pypa.io/get-pip.py \
 &&  pip install \
       bottleneck \
       cartopy \
-      dask \
+      dask[complete] \
       nc-time-axis \
       netCDF4 \
       numbagg \
