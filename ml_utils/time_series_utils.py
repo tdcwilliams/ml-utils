@@ -178,7 +178,7 @@ def split_sequence_lstm(sequence, length, shift=0):
     assert(shift + n_out <= n_in)
     return sequence[shift:shift + n_out].reshape((n_samples, length, 1))
 
-def test_split(series, ntest=None, frac=.5):
+def train_test_split(series, ntest=None, frac=.5):
     """
     Split series into train and test series
 
@@ -195,7 +195,10 @@ def test_split(series, ntest=None, frac=.5):
     test : numpy.ndarray
         testing set
     """
-    x = series.values.astype('float32')
+    if isinstance(series, pd.Series):
+        x = series.values.astype('float32')
+    else:
+        x = np.array(series)
     nx = len(x)
     if ntest is not None:
         assert(ntest<=nx)
@@ -203,7 +206,6 @@ def test_split(series, ntest=None, frac=.5):
     else:
         train_size = int(len(x) * frac)
     train, test = x[0:train_size], x[train_size:]
-    print(f"Train with {len(train)}, test on {len(test)}")
     return train, test
 
 def difference(series, interval=1):
