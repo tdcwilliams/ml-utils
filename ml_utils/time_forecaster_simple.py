@@ -4,11 +4,26 @@ time series forecasting models
 """
 import numpy as np
 from sklearn.metrics import mean_squared_error
+from matplotlib import pyplot as plt
 
 from ml_utils.time_series_utils import train_test_split
 
 class TimeSeriesForecasterSimple:
     def __init__(self, cfg=None):
+        """
+        Simple time series forecaster class
+
+        Parameters:
+        -----------
+        cfg : tuple
+            (shift, offset, avg_type)
+            avg_type : "persist", "drift", "mean", "median"
+            offset: only with average_forecast (mean or median). Include periodicity with this
+                    - eg offset=12 in a monthly dataset gives a monthly climatology
+            shift: how far back to go back
+                   - with persistence: shift=1 is the usual persistence (use last value for forecast);
+                                       shift=2 means take the 2nd-to-last value
+        """
         if cfg is None:
             cfg = (1, 1, "persist")
         self.cfg = cfg
@@ -38,14 +53,13 @@ class TimeSeriesForecasterSimple:
             values = history[-self.shift:]
         else:
             # skip bad configs
-            if self.shift*offset > len(history):
+            if self.shift*self.offset > len(history):
                 raise Exception('Config beyond end of data: %d %d' %(
                     self.shift, self.offset))
             # try and collect self.shift values using offset
             values = list()
             for i in range(1, self.shift+1):
-                ix = i * offset
-                values.append(history[-ix])
+                values.append(history[-i*self.offset])
         # check if we can average
         if len(values) < 2:
             raise Exception('Cannot calculate average')
@@ -67,6 +81,14 @@ class TimeSeriesForecasterSimple:
             # add actual observation to history for the next loop
             history.append(test[i])
         return predictions
+
+    def plot_predictions(self, data, n_test):
+        predictions = self.get_predictions(data, n_test)
+        plt.title(str(self.cfg))
+        plt.plot(data)
+        x = np.arange(len(data))[-len(predictions):]
+        plt.plot(x, predictions)
+        plt.show()
 
     # walk-forward validation for univariate data
     def walk_forward_validation(self, data, n_test):

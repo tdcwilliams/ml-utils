@@ -4,9 +4,6 @@ from joblib import delayed
 from warnings import catch_warnings
 from warnings import filterwarnings
 
-from numpy import arange
-from matplotlib import pyplot as plt
-
 class GridSearcher:
     def __init__(self, cfg_list, debug=False, parallel=True):
         self.cfg_list = cfg_list
@@ -53,12 +50,3 @@ class GridSearcher:
         print('\nTop three:')
         for (cls, cfg), rmse in self.scores[:3]:
             print(f'{cls}({cfg}): {rmse}')
-
-    def plot_best_model(self, data, n_test):
-        model = self.best_model
-        predictions = model.get_predictions(data, n_test)
-        plt.title(str(model.cfg))
-        plt.plot(data)
-        x = arange(len(data))[-len(predictions):]
-        plt.plot(x, predictions)
-        plt.show()
