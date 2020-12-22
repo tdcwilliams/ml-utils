@@ -1,6 +1,6 @@
 #! /bin/bash
 
-export ML_SRC_DIR=$HOME/machine-learning/ml-utils
+export ML_SRC_DIR=$HOME/src/machine-learning/ml-utils
 
 # Data
 export CLUSTER_ROOT_DIR=/cluster/projects/nn2993k/sim

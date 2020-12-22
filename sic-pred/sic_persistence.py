@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import itertools
 from collections import defaultdict
+from matplotlib import pyplot as plt
 
 from netCDF4 import Dataset
 
@@ -33,8 +34,8 @@ def comp_errors(dto, lag):
 
 def comp_all_errors():
     start = dt.datetime(2018,8,1)
-    end = dt.datetime(2018,8,14)
-    #end = dt.datetime(2019,7,31)
+    #end = dt.datetime(2018,8,14)
+    end = dt.datetime(2019,7,31)
     days = 1 + (end - start).days
     dates = [start + dt.timedelta(i) for i in range(days)]
     lags = [i+1 for i in range(7)]
@@ -46,12 +47,29 @@ def comp_all_errors():
             errors[k] += [v]
     return pd.DataFrame(errors)
 
+def make_plots(df, figname):
+    fig = plt.figure()
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+    for lag in df.Lag.unique():
+        df_ = df.loc[df.Lag==lag]
+        x = list(range(len(df_)))
+        ax1.plot(x, df_.Bias, label=str(lag))
+        ax2.plot(x, df_.RMSE, label=str(lag))
+    ax1.set_title('Bias')
+    ax2.set_title('RMSE')
+    ax2.legend()
+    print(f'Saving {figname}')
+    fig.savefig(figname)
+    plt.close()
+
 def run():
     df = comp_all_errors()
     outfile = 'out/persistence.csv'
     os.makedirs(os.path.dirname(outfile), exist_ok=True)
     print(f'Saving {outfile}')
     df.set_index('Date').to_csv(outfile)
+    make_plots(df, 'out/persistence.png')
 
 if __name__ == '__main__':
     run()
