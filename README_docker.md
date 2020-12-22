@@ -1,3 +1,4 @@
+# Docker usage
 Build the docker image with:
 ```
 build . -t machine-learning
@@ -32,3 +33,12 @@ Launch notebook with:
 jupyter-notebook --ip=0.0.0.0 --allow-root &
 ```
 and paste the last URL printed into a web browser.
+
+# Convert docker image to singularity image file
+```
+docker save machine-learning -o machine-learning.tar
+```
+Copy to fram
+```
+singularity build machine-learning.sif docker-archive://machine-learning.tar
+```
