@@ -14,19 +14,13 @@ _OSISAF_DIR = os.path.join(
 _NAME_MASK = os.path.join(_OSISAF_DIR,
         '%Y_nh_polstere/ice_conc_nh_polstere-100_multi_%Y%m%d1200.nc')
 
-def get_conc(f):
+def get_conc(dto):
     #print(f'Reading SIC from {f}')
+    f = dto.strftime(_NAME_MASK)
     with Dataset(f, 'r') as ds:
         return .01*ds.variables['ice_conc'][0].filled(np.nan)
 
-def get_prediction(dto, lag):
-    dto_hat = dto - dt.timedelta(lag)
-    return get_conc(dto_hat.strftime(_NAME_MASK))
-
-def comp_errors(dto, lag):
-    errors = dict()
-    sic = get_conc(dto.strftime(_NAME_MASK))
-    sic_hat = get_prediction(dto, lag)
+def comp_errors(sic, sic_hat):
     errors = dict()
     errors['Bias'] = np.nanmean(sic_hat-sic)
     errors['RMSE'] = np.sqrt(np.nanmean((sic_hat-sic)**2))
@@ -40,15 +34,19 @@ def comp_all_errors():
     dates = [start + dt.timedelta(i) for i in range(days)]
     lags = [i+1 for i in range(7)]
     errors = defaultdict(list)
-    for dto, lag in itertools.product(dates, lags):
-        errors['Date'] += [dto]
-        errors['Lag'] += [lag]
-        for k, v in comp_errors(dto, lag).items():
-            errors[k] += [v]
+    for dto in dates:
+        print(dto)
+        sic = get_conc(dto)
+        for lag in lags:
+            errors['Date'] += [dto]
+            errors['Lag'] += [lag]
+            sic_hat = get_conc(dto - dt.timedelta(lag))
+            for k, v in comp_errors(sic, sic_hat).items():
+                errors[k] += [v]
     return pd.DataFrame(errors)
 
 def make_plots(df, figname):
-    fig = plt.figure()
+    fig = plt.figure(figsize=(20,10))
     ax1 = fig.add_subplot(121)
     ax2 = fig.add_subplot(122)
     for lag in df.Lag.unique():
@@ -58,7 +56,7 @@ def make_plots(df, figname):
         ax2.plot(x, df_.RMSE, label=str(lag))
     ax1.set_title('Bias')
     ax2.set_title('RMSE')
-    ax2.legend()
+    ax1.legend()
     print(f'Saving {figname}')
     fig.savefig(figname)
     plt.close()
