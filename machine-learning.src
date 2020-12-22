@@ -1,0 +1,27 @@
+#! /bin/bash
+
+export ML_SRC_DIR=$HOME/machine-learning/ml-utils
+
+# Data
+export CLUSTER_ROOT_DIR=/cluster/projects/nn2993k/sim
+
+# paths to mount
+SINGULARITY_BINDPATH="$ML_SRC_DIR:/ml-utils"
+SINGULARITY_BINDPATH+=",$CLUSTER_ROOT_DIR"
+SINGULARITY_BINDPATH+=",$USERWORK"
+export SINGULARITY_BINDPATH
+
+# env vars inside container
+export SINGULARITYENV_PYTHONUNBUFFERED=1
+export SINGULARITYENV_CLUSTER_ROOT_DIR=$CLUSTER_ROOT_DIR
+
+#image file
+export ML_SIF="$HOME/singularity_image_files/machine-learning.sif"
+echo Start singularity container with:
+echo singularity shell --cleanenv $ML_SIF
+echo ""
+echo Run commands inside singularity containers with:
+echo singularity exec --cleanenv $ML_SIF COMMAND
+
+# short-cuts
+alias cdml="cd $ML_SRC_DIR"
