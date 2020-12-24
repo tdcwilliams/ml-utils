@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from matplotlib import dates as mdates
 from netCDF4 import Dataset
 
-from sic_pred_base import SicPredPersistence
+from sic_pred_base import SicPredClimatology
 
 _OSISAF_DIR = os.path.join(
         os.getenv('CLUSTER_ROOT_DIR'), 'data/OSISAF_ice_conc/polstere')

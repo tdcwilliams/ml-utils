@@ -58,5 +58,5 @@ class SicPredClimatology(SicPredBase):
         for i in range(self.num_years):
             dto_i = dt.datetime(self.latest_year - i, dto.month, dto.day)
             sic_hat += wt*self.get_conc(dto_i)
-        return self.get_conc(dto - dt.timedelta(self.lag))
+        return sic_hat
 
