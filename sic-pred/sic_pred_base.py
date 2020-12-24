@@ -31,7 +31,7 @@ class SicPredBase:
         days = 1 + (end - start).days
         errors = defaultdict(list)
         for i in range(days):
-            dto = self.start + dt.timedelta(i)
+            dto = start + dt.timedelta(i)
             print(dto)
             sic = self.get_conc(dto)
             sic_hat = self.forecast(dto)
