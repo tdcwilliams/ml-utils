@@ -10,15 +10,21 @@ _OSISAF_DIR = os.path.join(
         os.getenv('CLUSTER_ROOT_DIR'), 'data/OSISAF_ice_conc/polstere')
 _NAME_MASK = os.path.join(_OSISAF_DIR,
         '%Y_nh_polstere/ice_conc_nh_polstere-100_multi_%Y%m%d1200.nc')
+_MASK_VARS = vars(np.load('out/OSISAF_medium_arctic_mask.npz')
 
 class SicPredBase:
 
     @staticmethod
     def get_conc(dto):
+        if dto.year < 2016:
+            raise ValueError('Ignoring data pre-2016 due to missing data mask')
         #print(f'Reading SIC from {f}')
         f = dto.strftime(_NAME_MASK)
+        i0, i1, j0, j1 = _MASK_VARS['bbox']
         with Dataset(f, 'r') as ds:
-            return .01*ds.variables['ice_conc'][0].filled(np.nan)
+            sic = .01*ds.variables['ice_conc'][0][i0:i1, j0:j1].filled(np.nan)
+        sic[_MASK_VARS['mask']] = np.nan
+        return sic
 
     @staticmethod
     def comp_errors(sic, sic_hat):
@@ -56,7 +62,7 @@ class SicPredClimatology(SicPredBase):
         wt = 1/self.num_years
         sic_hat = 0
         for i in range(self.num_years):
-            dto_i = dt.datetime(self.latest_year - i, dto.month, dto.day)
+            dto_i = dto - dt.timedelta(int(i*365.25))
             sic_hat += wt*self.get_conc(dto_i)
         return sic_hat
 
