@@ -10,7 +10,7 @@ _OSISAF_DIR = os.path.join(
         os.getenv('CLUSTER_ROOT_DIR'), 'data/OSISAF_ice_conc/polstere')
 _NAME_MASK = os.path.join(_OSISAF_DIR,
         '%Y_nh_polstere/ice_conc_nh_polstere-100_multi_%Y%m%d1200.nc')
-_MASK_VARS = vars(np.load('out/OSISAF_medium_arctic_mask.npz')
+_MASK_VARS = dict(np.load('out/OSISAF_medium_arctic_mask.npz'))
 
 class SicPredBase:
 
