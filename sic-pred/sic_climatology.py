@@ -16,7 +16,7 @@ _NAME_MASK = os.path.join(_OSISAF_DIR,
 _START = dt.datetime(2020,1,1)
 _END = dt.datetime(2020,12,21)
 _LATEST_YEAR = 2019
-_MAX_YEARS = 4
+_MAX_YEARS = 3
 
 def make_plots(df_all, figname):
     fig = plt.figure(figsize=(20,10))
