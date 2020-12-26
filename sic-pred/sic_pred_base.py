@@ -16,8 +16,8 @@ class SicPredBase:
 
     @staticmethod
     def get_conc(dto):
-        if dto.year < 2016:
-            raise ValueError('Ignoring data pre-2016 due to missing data mask')
+        if dto < dt.datetime(2016,6,1):
+            raise ValueError('Ignoring data pre-2016-06-01 due to missing data mask')
         #print(f'Reading SIC from {f}')
         f = dto.strftime(_NAME_MASK)
         i0, i1, j0, j1 = _MASK_VARS['bbox']

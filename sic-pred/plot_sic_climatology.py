@@ -15,7 +15,7 @@ _NAME_MASK = os.path.join(_OSISAF_DIR,
 _LATEST_YEAR = 2019
 _START = dt.datetime(_LATEST_YEAR,1,1)
 _END = dt.datetime(_LATEST_YEAR,1,31)
-_NUM_YEARS = 4
+_NUM_YEARS = 3
 _FIG_MASK = f'out/climatology_{_NUM_YEARS}years/sic_%Y%m%d.png'
 
 def plot(sic, dto):
