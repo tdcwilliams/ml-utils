@@ -45,7 +45,7 @@ def run():
         os.makedirs(os.path.dirname(outfile), exist_ok=True)
         print(f'Saving {outfile}')
         df.set_index('Date').to_csv(outfile)
-        df_all[lag] = df
+        df_all[num_years] = df
     make_plots(df_all, 'out/climatology.png')
 
 if __name__ == '__main__':
