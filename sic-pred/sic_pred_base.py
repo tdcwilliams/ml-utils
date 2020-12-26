@@ -61,8 +61,9 @@ class SicPredClimatology(SicPredBase):
     def forecast(self, dto):
         wt = 1/self.num_years
         sic_hat = 0
-        for i in range(self.num_years):
+        i0 = dto.year - self.latest_year
+        assert(i0 >= 0)
+        for i in range(i0, i0 + self.num_years):
             dto_i = dto - dt.timedelta(int(i*365.25))
             sic_hat += wt*self.get_conc(dto_i)
         return sic_hat
-
