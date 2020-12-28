@@ -87,7 +87,8 @@ class SicPreproc(SicPredBase):
         sic[gpi] += sample
         return sic
 
-    def get_scaler(self, samples):
+    @staticmethod
+    def get_scaler(samples):
         scaler = StandardScaler()
         samples = scaler.fit_transform(samples)
         return scaler, samples
@@ -99,8 +100,8 @@ class SicPCA(SicPreproc):
         self.datetimes = datetimes
 
     @classmethod
-    def init_from_samples(self, samples, datetimes, **kwargs):
-        scaler, scaled_samples = self.get_scaler(samples)
+    def init_from_samples(cls, samples, datetimes, **kwargs):
+        scaler, scaled_samples = cls.get_scaler(samples)
         pca = PCA(**kwargs)
         pca.fit(scaled_samples)
         return SicPCA(pca, scaler, datetimes)

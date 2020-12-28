@@ -13,17 +13,16 @@ _OUTFILE = 'out/pca/pca.pkl'
 def load_samples():
     days = 1 + (_END - _START).days
     fc = SicPreproc()
+    datetimes = [_START + dt.timedelta(i) for i in range(days)]
     samples = []
-    for i in range(days):
-        dto = _START + dt.timedelta(i)
+    for dto in datetimes:
         print(f'Getting sample for {dto}')
         print(fc.get_sample(dto).shape)
         samples += [fc.get_sample(dto)]
-    return np.array(samples)
+    return np.array(samples), datetimes
 
 def run():
-    samples = load_samples()
-    pca = SicPCA.init_from_samples(samples)
+    pca = SicPCA.init_from_samples(*load_samples())
     print(f'Saving {_OUTFILE}')
     os.makedirs(os.path.dirname(_OUTFILE), exist_ok=True)
     pickle.dump(pca, open(_OUTFILE, 'wb'))
