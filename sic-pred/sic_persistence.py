@@ -2,10 +2,8 @@
 import os
 import datetime as dt
 import numpy as np
-from collections import defaultdict
 from matplotlib import pyplot as plt
 from matplotlib import dates as mdates
-from netCDF4 import Dataset
 
 from sic_pred_base import SicPredPersistence
 
