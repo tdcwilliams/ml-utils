@@ -50,7 +50,7 @@ def run():
     # save to file
     os.makedirs('out/pca', exist_ok=True)
     for v,k in [(scaler, 'scaler'), (pca, 'pca')]:
-        f =  _OUTFILES[k]
+        f = _OUTFILES[k]
         print(f'Saving {f}')
         pickle.dump(v, open(f, 'wb'))
 
