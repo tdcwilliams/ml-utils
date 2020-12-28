@@ -6,6 +6,9 @@ import pandas as pd
 from collections import defaultdict
 from netCDF4 import Dataset
 
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
 _OSISAF_DIR = os.path.join(
         os.getenv('CLUSTER_ROOT_DIR'), 'data/OSISAF_ice_conc/polstere')
 _NAME_MASK = os.path.join(_OSISAF_DIR,
@@ -33,14 +36,14 @@ class SicPredBase:
         errors['RMSE'] = np.sqrt(np.nanmean((sic_hat-sic)**2))
         return errors
 
-    def comp_all_errors(self, start, end):
+    def comp_all_errors(self, start, end, **kwargs):
         days = 1 + (end - start).days
         errors = defaultdict(list)
         for i in range(days):
             dto = start + dt.timedelta(i)
             print(dto)
             sic = self.get_conc(dto)
-            sic_hat = self.forecast(dto)
+            sic_hat = self.forecast(dto, **kwargs)
             errors['Date'] += [dto]
             for k, v in self.comp_errors(sic, sic_hat).items():
                 errors[k] += [v]
@@ -67,3 +70,47 @@ class SicPredClimatology(SicPredBase):
             dto_i = dto - dt.timedelta(int(i*365.25))
             sic_hat += wt*self.get_conc(dto_i)
         return sic_hat
+
+class SicPreproc(SicPredBase):
+
+    def get_ref_conc(self, dto):
+        return self.get_conc(dto - dt.timedelta(1))
+
+    def get_sample(self, dto):
+        dsic = self.get_conc(dto) - self.get_ref_conc(dto)
+        gpi = np.isfinite(dsic)
+        return dsic[gpi]
+
+    def convert_sample(self, dto, sample):
+        sic = self.get_ref_conc(dto)
+        gpi = np.isfinite(sic)
+        sic[gpi] += sample
+        return sic
+
+    def get_scaler(self, samples):
+        scaler = StandardScaler()
+        samples = scaler.fit_transform(samples)
+        return scaler, samples
+
+class SicPCA(SicPreproc):
+    def __init__(self, pca, scaler, datetimes):
+        self.pca = pca
+        self.scaler = scaler
+        self.datetimes = datetimes
+
+    @classmethod
+    def init_from_samples(self, samples, datetimes, **kwargs):
+        scaler, scaled_samples = self.get_scaler(samples)
+        pca = PCA(**kwargs)
+        pca.fit(scaled_samples)
+        return SicPCA(pca, scaler, datetimes)
+
+    def forecast(self, dto, index_components=None):
+        i =  self.datetimes.index(dto)
+        if index_components is None:
+            sample = self.pca.principal_components_[i,:]
+        else:
+            sample = self.pca.principal_components_[i,index_components]
+        for obj in [self.pca, self.scaler]:
+            sample = obj.invert_transform(sample)
+        return self.convert_sample(dto, sample)
