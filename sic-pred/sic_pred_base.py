@@ -14,6 +14,7 @@ _OSISAF_DIR = os.path.join(
 _NAME_MASK = os.path.join(_OSISAF_DIR,
         '%Y_nh_polstere/ice_conc_nh_polstere-100_multi_%Y%m%d1200.nc')
 _MASK_VARS = dict(np.load('out/OSISAF_medium_arctic_mask.npz'))
+_AREA_FACTOR = 10e3*10e3/(1e6*1e6) #grid cell area/10^6km^2
 
 class SicPredBase:
 
@@ -34,10 +35,20 @@ class SicPredBase:
         return np.isnan(self.get_conc(dt.datetime(2018,1,1)))
 
     @staticmethod
+    def get_ice_mask(sic):
+        ice = np.zeros_like(sic)
+        ice[sic>.15] = 1
+        ice[np.isnan(sic)] = np.nan
+        return ice
+
+    @staticmethod
     def comp_errors(sic, sic_hat):
         errors = dict()
         errors['Bias'] = np.nanmean(sic_hat-sic)
         errors['RMSE'] = np.sqrt(np.nanmean((sic_hat-sic)**2))
+        diff = self.get_ice_mask(sic_hat) - self.get_ice_mask(sic)
+        errors['Extent_bias'] = _AREA_FACTOR*np.nansum(diff)
+        errors['IIEE'] = _AREA_FACTOR*np.nansum(np.abs(diff))
         return errors
 
     def comp_all_errors(self, start, end, **kwargs):
