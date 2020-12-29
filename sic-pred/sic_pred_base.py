@@ -29,6 +29,10 @@ class SicPredBase:
         sic[_MASK_VARS['mask']] = np.nan
         return sic
 
+    @property
+    def mask(self):
+        return np.isnan(self.get_conc(dt.datetime(2018,1,1)))
+
     @staticmethod
     def comp_errors(sic, sic_hat):
         errors = dict()
@@ -81,11 +85,15 @@ class SicPreproc(SicPredBase):
         gpi = np.isfinite(dsic)
         return dsic[gpi]
 
+    def map_to_grid(self, sample):
+        mask = self.mask
+        v = np.zeros(mask.shape)
+        v[~mask] = sample
+        v[mask] = np.nan
+        return v
+
     def convert_sample(self, dto, sample):
-        sic = self.get_ref_conc(dto)
-        gpi = np.isfinite(sic)
-        sic[gpi] += sample
-        return sic
+        return self.get_ref_conc(dto) + self.map_to_grid(sample)
 
     @staticmethod
     def get_scaler(samples):
@@ -106,12 +114,20 @@ class SicPCA(SicPreproc):
         pca.fit(scaled_samples)
         return SicPCA(pca, scaler, datetimes)
 
+    def inverse_transforms(transform):
+        output = np.copy(transform)
+        for obj in [self.pca, self.scaler]:
+            output = obj.inverse_transform(output)
+        return output
+
+    def get_component(self, i):
+        print(self.pca.components_[i,:10])
+        return self.scaler.inverse_transform(self.pca.components_[i])
+
     def forecast(self, dto, index_components=None):
         i =  self.datetimes.index(dto)
-        sample = np.zeros_like(self.pca.principal_components_)
+        sample = np.zeros((1, self.pca.n_features_))
         if index_components is not None:
             index_components = slice(None)
-        sample[i, index_components] = self.pca.principal_components_[i, index_components]
-        for obj in [self.pca, self.scaler]:
-            sample = obj.invert_transform(sample)
-        return self.convert_sample(dto, sample)
+        sample[index_components] = self.pca.principal_components_[i, index_components]
+        return self.convert_sample(dto, self.inverse_transforms(sample))
