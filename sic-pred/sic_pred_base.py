@@ -108,10 +108,10 @@ class SicPCA(SicPreproc):
 
     def forecast(self, dto, index_components=None):
         i =  self.datetimes.index(dto)
-        if index_components is None:
-            sample = self.pca.principal_components_[i,:]
-        else:
-            sample = self.pca.principal_components_[i,index_components]
+        sample = np.zeros_like(self.pca.principal_components_)
+        if index_components is not None:
+            index_components = slice(None)
+        sample[i, index_components] = self.pca.principal_components_[i, index_components]
         for obj in [self.pca, self.scaler]:
             sample = obj.invert_transform(sample)
         return self.convert_sample(dto, sample)

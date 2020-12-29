@@ -8,10 +8,6 @@ from netCDF4 import Dataset
 
 from sic_pred_base import SicPredClimatology
 
-_OSISAF_DIR = os.path.join(
-        os.getenv('CLUSTER_ROOT_DIR'), 'data/OSISAF_ice_conc/polstere')
-_NAME_MASK = os.path.join(_OSISAF_DIR,
-        '%Y_nh_polstere/ice_conc_nh_polstere-100_multi_%Y%m%d1200.nc')
 _LATEST_YEAR = 2019
 _START = dt.datetime(_LATEST_YEAR,1,1)
 _END = dt.datetime(_LATEST_YEAR,1,31)
