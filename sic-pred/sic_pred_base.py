@@ -130,6 +130,9 @@ class SicPCA(SicPreproc):
         pca.fit(scaled_samples)
         return SicPCA(pca, scaler, datetimes, ref_lag=ref_lag)
 
+    def get_component(self, i):
+        return self.scaler.inverse_transform(self.pca.components_[i])
+
     def transform(sample):
         output = np.copy(sample)
         for obj in self.transformers:
@@ -141,9 +144,6 @@ class SicPCA(SicPreproc):
         for obj in self.transformers[::-1]:
             output = obj.inverse_transform(output)
         return output
-
-    def get_component(self, i):
-        return self.scaler.inverse_transform(self.pca.components_[i])
 
     def project(self, dto, n_components=None):
         sample = self.get_sample(dto)
