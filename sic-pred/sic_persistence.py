@@ -4,6 +4,7 @@ import datetime as dt
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import dates as mdates
+import pandas as pd
 
 from sic_pred_base import SicPredPersistence
 
@@ -33,11 +34,14 @@ def run():
     df_all = dict()
     for lag in range(1, _MAX_LAG + 1):
         fc = SicPredPersistence(lag)
-        df = fc.comp_all_errors(_START, _END)
         outfile = f'out/persistence-lag{lag}.csv'
-        os.makedirs(os.path.dirname(outfile), exist_ok=True)
-        print(f'Saving {outfile}')
-        df.set_index('Date').to_csv(outfile)
+        if os.path.exists(outfile):
+            df = pd.read_csv(outfile)
+        else:
+            df = fc.comp_all_errors(_START, _END)
+            os.makedirs(os.path.dirname(outfile), exist_ok=True)
+            print(f'Saving {outfile}')
+            df.set_index('Date').to_csv(outfile)
         df_all[lag] = df
     make_plots(df_all, 'out/persistence.png')
 
