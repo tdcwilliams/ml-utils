@@ -18,8 +18,7 @@ def load_samples():
     samples = []
     for dto in datetimes:
         print(f'Getting sample for {dto}')
-        print(fc.get_sample(dto).shape)
-        samples += [fc.get_sample(dto)]
+        samples += [fc.get_sample(dto).flatten()]
     return np.array(samples), datetimes
 
 def run():

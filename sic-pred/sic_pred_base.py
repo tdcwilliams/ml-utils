@@ -94,12 +94,12 @@ class SicPreproc(SicPredBase):
         arr = self.get_conc(dto)
         if self.ref_lag is not None:
             arr -= self.get_conc(dto - dt.timedelta(self.ref_lag))
-        return arr[np.isfinite(arr)]
+        return np.array([arr[np.isfinite(arr)]])
 
     def map_to_grid(self, sample):
         mask = self.mask
         v = np.zeros(mask.shape)
-        v[~mask] = sample
+        v[~mask] = sample.flatten()
         v[mask] = np.nan
         return v
 
@@ -133,13 +133,13 @@ class SicPCA(SicPreproc):
     def get_component(self, i):
         return self.scaler.inverse_transform(self.pca.components_[i])
 
-    def transform(sample):
+    def transform(self, sample):
         output = np.copy(sample)
         for obj in self.transformers:
             output = obj.transform(output)
         return output
 
-    def inverse_transform(transform):
+    def inverse_transform(self, transform):
         output = np.copy(transform)
         for obj in self.transformers[::-1]:
             output = obj.inverse_transform(output)
@@ -150,7 +150,7 @@ class SicPCA(SicPreproc):
         transform = self.transform(sample)
         if n_components is not None:
             transform[n_components:] = 0.
-        return self.convert_sample(dto, self.inverse_transform(sample))
+        return self.convert_sample(dto, self.inverse_transform(transform))
 
     def comp_all_errors(self, start, end, n_components=None):
         days = 1 + (end - start).days
