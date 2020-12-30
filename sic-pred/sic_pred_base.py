@@ -51,14 +51,14 @@ class SicPredBase:
         errors['IIEE'] = _AREA_FACTOR*np.nansum(np.abs(diff))
         return errors
 
-    def comp_all_errors(self, start, end, **kwargs):
+    def comp_all_errors(self, start, end):
         days = 1 + (end - start).days
         errors = defaultdict(list)
         for i in range(days):
             dto = start + dt.timedelta(i)
             print(dto)
             sic = self.get_conc(dto)
-            sic_hat = self.forecast(dto, **kwargs)
+            sic_hat = self.forecast(dto)
             errors['Date'] += [dto]
             for k, v in self.comp_errors(sic, sic_hat).items():
                 errors[k] += [v]
@@ -88,13 +88,14 @@ class SicPredClimatology(SicPredBase):
 
 class SicPreproc(SicPredBase):
 
-    def get_ref_conc(self, dto):
-        return self.get_conc(dto - dt.timedelta(1))
+    def __init__(self, ref_lag=None):
+        self.ref_lag = ref_lag
 
     def get_sample(self, dto):
-        dsic = self.get_conc(dto) - self.get_ref_conc(dto)
-        gpi = np.isfinite(dsic)
-        return dsic[gpi]
+        arr = self.get_conc(dto)
+        if self.ref_lag is not None:
+            arr -= self.get_conc(dto - dt.timedelta(self.ref_lag))
+        return arr[np.isfinite(arr)]
 
     def map_to_grid(self, sample):
         mask = self.mask
@@ -104,7 +105,10 @@ class SicPreproc(SicPredBase):
         return v
 
     def convert_sample(self, dto, sample):
-        return self.get_ref_conc(dto) + self.map_to_grid(sample)
+        out = self.map_to_grid(sample)
+        if self.ref_lag is not None:
+            out += self.get_conc(dto - dt.timedelta(self.ref_lag))
+        return out
 
     @staticmethod
     def get_scaler(samples):
@@ -113,32 +117,51 @@ class SicPreproc(SicPredBase):
         return scaler, samples
 
 class SicPCA(SicPreproc):
-    def __init__(self, pca, scaler, datetimes):
+    def __init__(self, pca, scaler, datetimes, ref_lag=None):
+        super().__init__(ref_lag=ref_lag)
         self.pca = pca
         self.scaler = scaler
         self.datetimes = datetimes
+        self.transformers = [self.scaler, self.pca]
 
     @classmethod
-    def init_from_samples(cls, samples, datetimes, **kwargs):
+    def init_from_samples(cls, samples, datetimes, ref_lag=None, **kwargs):
         scaler, scaled_samples = cls.get_scaler(samples)
         pca = PCA(**kwargs)
         pca.fit(scaled_samples)
-        return SicPCA(pca, scaler, datetimes)
+        return SicPCA(pca, scaler, datetimes, ref_lag=ref_lag)
 
-    def inverse_transforms(transform):
+    def transform(sample):
+        output = np.copy(sample)
+        for obj in self.transformers:
+            output = obj.transform(output)
+        return output
+
+    def inverse_transform(transform):
         output = np.copy(transform)
-        for obj in [self.pca, self.scaler]:
+        for obj in self.transformers[::-1]:
             output = obj.inverse_transform(output)
         return output
 
     def get_component(self, i):
-        print(self.pca.components_[i,:10])
         return self.scaler.inverse_transform(self.pca.components_[i])
 
-    def forecast(self, dto, index_components=None):
-        i =  self.datetimes.index(dto)
-        sample = np.zeros((1, self.pca.n_features_))
-        if index_components is not None:
-            index_components = slice(None)
-        sample[index_components] = self.pca.principal_components_[i, index_components]
-        return self.convert_sample(dto, self.inverse_transforms(sample))
+    def project(self, dto, n_components=None):
+        sample = self.get_sample(dto)
+        transform = self.transform(sample)
+        if n_components is not None:
+            transform[n_components:] = 0.
+        return self.convert_sample(dto, self.inverse_transform(sample))
+
+    def comp_all_errors(self, start, end, n_components=None):
+        days = 1 + (end - start).days
+        errors = defaultdict(list)
+        for i in range(days):
+            dto = start + dt.timedelta(i)
+            print(dto)
+            sic = self.get_conc(dto)
+            sic_hat = self.project(dto, n_components=n_components)
+            errors['Date'] += [dto]
+            for k, v in self.comp_errors(sic, sic_hat).items():
+                errors[k] += [v]
+        return pd.DataFrame(errors)

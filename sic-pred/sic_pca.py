@@ -9,6 +9,7 @@ from sic_pred_base import SicPreproc, SicPCA
 _START = dt.datetime(2020,1,1)
 _END = dt.datetime(2020,12,21)
 _OUTFILE = 'out/pca/pca.pkl'
+_REF_LAG = 1
 
 def load_samples():
     days = 1 + (_END - _START).days
@@ -22,7 +23,7 @@ def load_samples():
     return np.array(samples), datetimes
 
 def run():
-    pca = SicPCA.init_from_samples(*load_samples())
+    pca = SicPCA.init_from_samples(*load_samples(), ref_lag=_REF_LAG)
     print(f'Saving {_OUTFILE}')
     os.makedirs(os.path.dirname(_OUTFILE), exist_ok=True)
     pickle.dump(pca, open(_OUTFILE, 'wb'))
