@@ -13,19 +13,19 @@ _END = dt.datetime(2020,12,21)
 _MAX_LAG = 7
 
 def make_plots(df_all, figname):
-    fig = plt.figure(figsize=(20,10))
-    ax1 = fig.add_subplot(121)
-    ax2 = fig.add_subplot(122)
+    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(20,10))
     for lag, df in df_all.items():
-        ax1.plot(df.Date, df.Bias, label='Lag=%i' %lag)
-        ax2.plot(df.Date, df.RMSE, label='Lag=%i' %lag)
-    ax1.set_title('Bias')
-    ax2.set_title('RMSE')
-    for ax in [ax1, ax2]:
-        ax.xaxis.set_minor_locator(mdates.MonthLocator(interval=1))
-        ax.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
-    ax1.legend()
+        for ax, stat, units in zip(axes.flatten(),
+                ['Bias', 'RMSE', 'Extent_Bias', 'IIEE'],
+                ['', '', r', $10^6$km$^2$', r', $10^6$km$^2$'],
+                ):
+            ax.plot(df.Date, df[stat], label='Lag=%i' %lag)
+            ax.set_ylabel(stat.replace('_', ' ') + units)
+            ax.xaxis.set_minor_locator(mdates.MonthLocator(interval=1))
+            ax.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
+    axes[0,0].legend()
     fig.autofmt_xdate()
+    os.makedirs(os.path.dirname(figname), exist_ok=True)
     print(f'Saving {figname}')
     fig.savefig(figname)
     plt.close()
