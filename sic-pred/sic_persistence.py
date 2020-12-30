@@ -36,6 +36,7 @@ def run():
         fc = SicPredPersistence(lag)
         outfile = f'out/persistence-lag{lag}.csv'
         if os.path.exists(outfile):
+            print(f'Reading {outfile}')
             df = pd.read_csv(outfile)
         else:
             df = fc.comp_all_errors(_START, _END)
