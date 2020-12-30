@@ -41,13 +41,12 @@ class SicPredBase:
         ice[np.isnan(sic)] = np.nan
         return ice
 
-    @staticmethod
-    def comp_errors(sic, sic_hat):
+    def comp_errors(self, sic, sic_hat):
         errors = dict()
         errors['Bias'] = np.nanmean(sic_hat-sic)
         errors['RMSE'] = np.sqrt(np.nanmean((sic_hat-sic)**2))
         diff = self.get_ice_mask(sic_hat) - self.get_ice_mask(sic)
-        errors['Extent_bias'] = _AREA_FACTOR*np.nansum(diff)
+        errors['Extent_Bias'] = _AREA_FACTOR*np.nansum(diff)
         errors['IIEE'] = _AREA_FACTOR*np.nansum(np.abs(diff))
         return errors
 
