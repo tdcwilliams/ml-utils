@@ -13,7 +13,7 @@ _END = dt.datetime(2020,12,21)
 _LATEST_YEAR = 2019
 _MAX_YEARS = 3
 
-def make_plots(df_all, figname):
+def plot_errors(df_all, figname):
     fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(20,10))
     for num_years, df in df_all.items():
         for ax, stat, units in zip(axes.flatten(),
@@ -45,7 +45,7 @@ def run():
             print(f'Saving {outfile}')
             df.set_index('Date').to_csv(outfile)
         df_all[num_years] = df
-    make_plots(df_all, 'out/climatology.png')
+    plot_errors(df_all, 'out/climatology.png')
 
 if __name__ == '__main__':
     run()
