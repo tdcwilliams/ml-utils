@@ -131,7 +131,7 @@ class SicPCA(SicPreproc):
         return SicPCA(pca, scaler, datetimes, ref_lag=ref_lag)
 
     def get_component(self, i):
-        return self.scaler.inverse_transform(self.pca.components_[i])
+        return self.pca.components_[i]
 
     def transform(self, sample):
         output = np.copy(sample)
