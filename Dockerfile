@@ -43,8 +43,8 @@ WORKDIR /tmp
 RUN wget https://bootstrap.pypa.io/get-pip.py \
 &&  python3 get-pip.py \
 &&  rm get-pip.py \
-&&  pip install --upgrade pip \
-&&  pip install \
+&&  pip install --upgrade pip
+RUN pip install \
       beautifulsoup4 \
       cython \
       dlib \
@@ -69,19 +69,13 @@ RUN wget https://bootstrap.pypa.io/get-pip.py \
       seaborn \
       shapely \
       statsmodels \
-      tensorflow==2.0.0 \
-&&  pip install \
-      bottleneck \
+      tensorflow==2.0.0
+RUN pip install \
       cartopy \
-      dask[complete] \
+      cmocean \
       nc-time-axis \
       netCDF4 \
-      numbagg \
       shapely --no-binary shapely \
-      tlz \
-      zarr \
-&&  pip install \
-      xarray \
-      eofs
+      xgboost
 
 WORKDIR /root
