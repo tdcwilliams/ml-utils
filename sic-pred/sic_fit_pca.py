@@ -9,7 +9,8 @@ from sic_pred_base import SicPreproc, SicPCA
 _START = dt.datetime(2020,1,1)
 _END = dt.datetime(2020,12,21)
 _OUTFILE = 'out/pca/pca.pkl'
-_REF_LAG = 1
+#_REF_LAG = 1
+_REF_LAG = None
 
 def load_samples():
     days = 1 + (_END - _START).days

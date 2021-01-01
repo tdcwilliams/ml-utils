@@ -30,7 +30,7 @@ def plot_errors(df_all, figname):
 def plot_component(pca, i):
     pc = pca.map_to_grid(pca.get_component(i))
     evr = pca.pca.explained_variance_ratio_[i]
-    figname = f'out/pca/pc{i}.png'
+    figname = f'out/pca/components/pc{i}.png'
     fig = plt.figure(figsize=(10,10))
     ax = fig.add_subplot(111)
     ax.set_title(f'Principal component {i}: explained variance = {100*evr}%')
@@ -50,12 +50,12 @@ def plot_expl_var_ratio(pca):
     fig.savefig(figname)
 
 def plot_components(pca):
-    for i in range(50):
+    for i in range(10):
         plot_component(pca, i)
 
 def do_eval(pca):
     df_all = dict()
-    for npc in [1,10,20,50,100]:
+    for npc in [1,10,20,50,100, 356]:
         outfile = f'out/pca/pca{npc}.csv'
         if os.path.exists(outfile):
             print(f'Reading {outfile}')
@@ -63,7 +63,8 @@ def do_eval(pca):
         else:
             start = pca.datetimes[0]
             end = pca.datetimes[-1]
-            df = pca.comp_all_errors(start, end, n_components=npc)
+            df = pca.comp_all_errors(start, end, n_components=npc,
+                    figmask=f'out/pca/maps{npc}/error-maps-%Y%m%d.png')
             os.makedirs(os.path.dirname(outfile), exist_ok=True)
             print(f'Saving {outfile}')
             df.set_index('Date').to_csv(outfile)

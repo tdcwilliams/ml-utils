@@ -69,7 +69,7 @@ class SicPredBase:
         fig.savefig(figname)
         plt.close()
 
-    def comp_all_errors(self, start, end):
+    def comp_all_errors(self, start, end, figmask=None):
         days = 1 + (end - start).days
         errors = defaultdict(list)
         for i in range(days):
@@ -80,6 +80,8 @@ class SicPredBase:
             errors['Date'] += [dto]
             for k, v in self.comp_errors(sic, sic_hat).items():
                 errors[k] += [v]
+            if figmask is not None:
+                self.map_errors(sic, sic_hat, dto, dto.strftime(figmask))
         return pd.DataFrame(errors)
 
 class SicPredPersistence(SicPredBase):
@@ -171,7 +173,7 @@ class SicPCA(SicPreproc):
             transform[0,n_components:] = 0.
         return self.convert_sample(dto, self.inverse_transform(transform))
 
-    def comp_all_errors(self, start, end, n_components=None):
+    def comp_all_errors(self, start, end, n_components=None, figmask=None):
         days = 1 + (end - start).days
         errors = defaultdict(list)
         for i in range(days):
@@ -182,4 +184,6 @@ class SicPCA(SicPreproc):
             errors['Date'] += [dto]
             for k, v in self.comp_errors(sic, sic_hat).items():
                 errors[k] += [v]
+            if figmask is not None:
+                self.map_errors(sic, sic_hat, dto, dto.strftime(figmask))
         return pd.DataFrame(errors)
