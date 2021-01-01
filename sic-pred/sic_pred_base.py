@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 from netCDF4 import Dataset
+from matplotlib import pyplot as plt
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
@@ -49,6 +50,24 @@ class SicPredBase:
         errors['Extent_Bias'] = _AREA_FACTOR*np.nansum(diff)
         errors['IIEE'] = _AREA_FACTOR*np.nansum(np.abs(diff))
         return errors
+
+    @staticmethod
+    def map_errors(sic, sic_hat, dto, figname):
+        fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(20,10))
+        for ax, arr, clim, cmap, ttl in zip(axes,
+                [sic, sic_hat, sic_hat-sic],
+                [(0,1),(0,1),(-.5,.5)],
+                ['viridis', 'viridis', 'bwr'],
+                ['SIC Obs.', 'SIC Model', 'SIC Bias'],
+                ):
+            im = ax.imshow(arr, clim=clim, cmap=cmap)
+            fig.colorbar(im, ax=ax, shrink=.4)
+            ax.set_title(ttl + dto.strftime(' %Y-%m-%d'))
+        if os.path.sep in figname:
+            os.makedirs(os.path.dirname(figname), exist_ok=True)
+        print(f'Saving {figname}')
+        fig.savefig(figname)
+        plt.close()
 
     def comp_all_errors(self, start, end):
         days = 1 + (end - start).days
@@ -149,7 +168,7 @@ class SicPCA(SicPreproc):
         sample = self.get_sample(dto)
         transform = self.transform(sample)
         if n_components is not None:
-            transform[n_components:] = 0.
+            transform[0,n_components:] = 0.
         return self.convert_sample(dto, self.inverse_transform(transform))
 
     def comp_all_errors(self, start, end, n_components=None):
