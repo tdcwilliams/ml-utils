@@ -37,6 +37,7 @@ def plot_components(sic_pca):
 
 def do_eval(sic_pca):
     pfile = 'out/persistence-lag1.csv'
+    print(f'Reading {pfile}')
     df_all = dict(persistence=pd.read_csv(pfile))
     for npc in [1, 5, 10, 20, 50, 100, 356]:
         outfile = f'out/pca/pca{npc}.csv'

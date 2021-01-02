@@ -14,7 +14,9 @@ _LATEST_YEAR = 2019
 _MAX_YEARS = 3
 
 def run():
-    df_all = dict()
+    pfile = 'out/persistence-lag1.csv'
+    print(f'Reading {pfile}')
+    df_all = dict(persistence=pd.read_csv(pfile))
     for num_years in range(1, _MAX_YEARS + 1):
         fc = SicPredClimatology(_LATEST_YEAR, num_years)
         outfile = f'out/climatology-years{num_years}.csv'
