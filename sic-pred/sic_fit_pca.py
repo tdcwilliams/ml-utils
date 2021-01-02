@@ -23,10 +23,10 @@ def load_samples():
     return np.array(samples), datetimes
 
 def run():
-    pca = SicPCA.init_from_samples(*load_samples(), ref_lag=_REF_LAG)
+    sic_pca = SicPCA.init_from_samples(*load_samples(), ref_lag=_REF_LAG)
     print(f'Saving {_OUTFILE}')
     os.makedirs(os.path.dirname(_OUTFILE), exist_ok=True)
-    pickle.dump(pca, open(_OUTFILE, 'wb'))
+    pickle.dump(sic_pca, open(_OUTFILE, 'wb'))
 
 if __name__ == '__main__':
     run()

@@ -84,6 +84,25 @@ class SicPredBase:
                 self.map_errors(sic, sic_hat, dto, dto.strftime(figmask))
         return pd.DataFrame(errors)
 
+    @staticmethod
+    def plot_errors(df_all, figname):
+        fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(20,10))
+        for lbl, df in df_all.items():
+            for ax, stat, units in zip(axes.flatten(),
+                    ['Bias', 'RMSE', 'Extent_Bias', 'IIEE'],
+                    ['', '', r', $10^6$km$^2$', r', $10^6$km$^2$'],
+                    ):
+                ax.plot(df.Date, df[stat], label=lbl)
+                ax.set_ylabel(stat.replace('_', ' ') + units)
+                ax.xaxis.set_minor_locator(mdates.MonthLocator(interval=1))
+                ax.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
+        axes[0,0].legend()
+        fig.autofmt_xdate()
+        os.makedirs(os.path.dirname(figname), exist_ok=True)
+        print(f'Saving {figname}')
+        fig.savefig(figname)
+        plt.close()
+
 class SicPredPersistence(SicPredBase):
     def __init__(self, lag):
         self.lag = lag
