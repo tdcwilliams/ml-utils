@@ -55,7 +55,6 @@ RUN pip install \
       jupyter \
       matplotlib \
       mock \
-      netcdf4 \
       nose \
       numpy \
       opencv-contrib-python \
