@@ -45,7 +45,8 @@ def do_eval(sic_pca):
             start = sic_pca.datetimes[0]
             end = sic_pca.datetimes[-1]
             df = sic_pca.comp_all_errors(start, end, n_components=npc,
-                    figmask=f'out/pca/maps{npc}/error-maps-%Y%m%d.png')
+                    figmask=f'out/pca/maps{npc}/error-maps-%Y%m%d.png',
+                    figstep=14)
             os.makedirs(os.path.dirname(outfile), exist_ok=True)
             print(f'Saving {outfile}')
             df.set_index('Date').to_csv(outfile)
