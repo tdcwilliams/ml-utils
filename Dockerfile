@@ -1,6 +1,7 @@
 FROM ubuntu:bionic
 ENV DEBIAN_FRONTEND=noninteractive \
-    PYTHONPATH=$PYTHONPATH:/ml-utils
+    PYTHONPATH=$PYTHONPATH:/ml-utils \
+    PYTHON_UNBUFFERED=1
 
 RUN apt-get update \
 &&  apt-get upgrade -y \
@@ -54,6 +55,7 @@ RUN pip install \
       jupyter \
       matplotlib \
       mock \
+      netcdf4 \
       nose \
       numpy \
       opencv-contrib-python \
