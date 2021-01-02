@@ -6,7 +6,7 @@ import pickle
 
 from sic_pred_base import SicPreproc, SicPCA
 
-_START = dt.datetime(2018,1,1)
+_START = dt.datetime(2018,1,21) #2018-1-20 has problems
 _END = dt.datetime(2020,12,31)
 _OUTFILE1 = 'out/pca/samples.npz'
 _OUTFILE2 = 'out/pca/sic_pca.pkl'
@@ -26,6 +26,7 @@ def save_samples():
             datetimes=np.array(datetimes), allow_pickle=True)
 
 def load_samples():
+    print(f'Loading {_OUTFILE1}')
     f = np.load(_OUTFILE1, allow_pickle=True)
     return f['samples'], list(f['datetimes'])
 
@@ -33,6 +34,7 @@ def run():
     if not os.path.exists(_OUTFILE1):
         os.makedirs(os.path.dirname(_OUTFILE1), exist_ok=True)
         save_samples()
+    print('Running PCA')
     sic_pca = SicPCA.init_from_samples(*load_samples(), ref_lag=_REF_LAG)
     print(f'Saving {_OUTFILE2}')
     pickle.dump(sic_pca, open(_OUTFILE2, 'wb'))

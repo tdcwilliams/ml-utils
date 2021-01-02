@@ -8,8 +8,8 @@ import pandas as pd
 
 from sic_pred_base import SicPredPersistence
 
-_START = dt.datetime(2020,1,1)
-_END = dt.datetime(2020,12,21)
+_START = dt.datetime(2018,1,20)
+_END = dt.datetime(2020,12,31)
 _MAX_LAG = 7
 
 def run():
@@ -17,6 +17,7 @@ def run():
     for lag in range(1, _MAX_LAG + 1):
         outfile = f'out/persistence-lag{lag}.csv'
         if not os.path.exists(outfile):
+            fc = SicPredPersistence(lag)
             df = fc.comp_all_errors(_START, _END)
             os.makedirs(os.path.dirname(outfile), exist_ok=True)
             print(f'Saving {outfile}')
