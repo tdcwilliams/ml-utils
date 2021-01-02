@@ -7,7 +7,7 @@ from matplotlib import dates as mdates
 import pandas as pd
 import pickle
 
-_OUTFILE = 'out/pca/pca.pkl'
+_OUTFILE = 'out/pca/sic_pca.pkl'
 
 def plot_component(sic_pca, i):
     pc = sic_pca.map_to_grid(sic_pca.get_component(i))
