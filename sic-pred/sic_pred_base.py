@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 from netCDF4 import Dataset
+from matplotlib import pyplot as plt, dates as mdates
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
@@ -50,7 +51,25 @@ class SicPredBase:
         errors['IIEE'] = _AREA_FACTOR*np.nansum(np.abs(diff))
         return errors
 
-    def comp_all_errors(self, start, end):
+    @staticmethod
+    def map_errors(sic, sic_hat, dto, figname):
+        fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(20,10))
+        for ax, arr, clim, cmap, ttl in zip(axes,
+                [sic, sic_hat, sic_hat-sic],
+                [(0,1),(0,1),(-.5,.5)],
+                ['viridis', 'viridis', 'bwr'],
+                ['SIC Obs.', 'SIC Model', 'SIC Bias'],
+                ):
+            im = ax.imshow(arr, clim=clim, cmap=cmap)
+            fig.colorbar(im, ax=ax, shrink=.4)
+            ax.set_title(ttl + dto.strftime(' %Y-%m-%d'))
+        if os.path.sep in figname:
+            os.makedirs(os.path.dirname(figname), exist_ok=True)
+        print(f'Saving {figname}')
+        fig.savefig(figname)
+        plt.close()
+
+    def comp_all_errors(self, start, end, figmask=None):
         days = 1 + (end - start).days
         errors = defaultdict(list)
         for i in range(days):
@@ -61,7 +80,28 @@ class SicPredBase:
             errors['Date'] += [dto]
             for k, v in self.comp_errors(sic, sic_hat).items():
                 errors[k] += [v]
+            if figmask is not None:
+                self.map_errors(sic, sic_hat, dto, dto.strftime(figmask))
         return pd.DataFrame(errors)
+
+    @staticmethod
+    def plot_errors(df_all, figname):
+        fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(20,10))
+        for lbl, df in df_all.items():
+            for ax, stat, units in zip(axes.flatten(),
+                    ['Bias', 'RMSE', 'Extent_Bias', 'IIEE'],
+                    ['', '', r', $10^6$km$^2$', r', $10^6$km$^2$'],
+                    ):
+                ax.plot(df.Date, df[stat], label=lbl)
+                ax.set_ylabel(stat.replace('_', ' ') + units)
+                ax.xaxis.set_minor_locator(mdates.MonthLocator(interval=1))
+                ax.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
+        axes[0,0].legend()
+        fig.autofmt_xdate()
+        os.makedirs(os.path.dirname(figname), exist_ok=True)
+        print(f'Saving {figname}')
+        fig.savefig(figname)
+        plt.close()
 
 class SicPredPersistence(SicPredBase):
     def __init__(self, lag):
@@ -149,10 +189,10 @@ class SicPCA(SicPreproc):
         sample = self.get_sample(dto)
         transform = self.transform(sample)
         if n_components is not None:
-            transform[n_components:] = 0.
+            transform[0,n_components:] = 0.
         return self.convert_sample(dto, self.inverse_transform(transform))
 
-    def comp_all_errors(self, start, end, n_components=None):
+    def comp_all_errors(self, start, end, n_components=None, figmask=None, figstep=1):
         days = 1 + (end - start).days
         errors = defaultdict(list)
         for i in range(days):
@@ -163,4 +203,6 @@ class SicPCA(SicPreproc):
             errors['Date'] += [dto]
             for k, v in self.comp_errors(sic, sic_hat).items():
                 errors[k] += [v]
+            if figmask is not None and i % figstep == 0:
+                self.map_errors(sic, sic_hat, dto, dto.strftime(figmask))
         return pd.DataFrame(errors)
