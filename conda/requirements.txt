@@ -1,10 +1,7 @@
 beautifulsoup4
 cartopy
 cmocean
-cython
-dlib
 graphviz
-imutils
 ipython
 jupyter
 matplotlib
