@@ -1,4 +1,4 @@
-FROM ubuntu:bionic as base
+FROM ubuntu:bionic AS base
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONPATH=$PYTHONPATH:/ml-utils \
     PYTHON_UNBUFFERED=1
@@ -40,34 +40,17 @@ RUN apt-get update \
       wget \
 && rm -rf /var/lib/apt/lists/*
 
-# Non deep learning packages - install with conda
-FROM base as simple
-ENV PATH /opt/conda/bin:$PATH
-COPY conda/requirements.txt /tmp/requirements.txt
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh \
- && /bin/bash /tmp/miniconda.sh -b -p /opt/conda \
- && rm /tmp/miniconda.sh \
- && ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
- && echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc \
- && echo "conda activate base" >> ~/.bashrc \
- && conda update -yq conda \
- && conda install -y -c conda-forge --file /tmp/requirements.txt \
- && /opt/conda/bin/conda clean -a \
- && rm -rf $HOME/.cache/yarn \
- && rm -rf /opt/conda/pkgs/*
-
 # Deep learning packages - use pip since tensorflow v 2.0 is not in conda-forge
-FROM base as deep
+FROM base AS deep
 WORKDIR /tmp
 RUN wget https://bootstrap.pypa.io/get-pip.py \
 &&  python3 get-pip.py \
-&&  rm get-pip.py \
 &&  pip install --upgrade pip
 RUN pip install \
       beautifulsoup4 \
       graphviz \
       imutils \
-      jedi=0.17.2 \
+      jedi==0.17.2 \
       matplotlib \
       mock \
       nose \
@@ -95,5 +78,24 @@ RUN pip install \
       netCDF4 \
       shapely --no-binary shapely \
       xgboost
+RUN rm -rf /tmp/*
+WORKDIR /root
+
+# Non deep learning packages - install with conda
+FROM base AS simple
+ENV PATH /opt/conda/bin:$PATH
+COPY conda/requirements.txt /tmp/requirements.txt
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh \
+ && /bin/bash /tmp/miniconda.sh -b -p /opt/conda \
+ && rm /tmp/miniconda.sh \
+ && ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
+ && echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc \
+ && echo "conda activate base" >> ~/.bashrc \
+ && conda update -yq conda \
+ && conda install -y -c conda-forge --file /tmp/requirements.txt \
+ && /opt/conda/bin/conda clean -a \
+ && rm -rf $HOME/.cache/yarn \
+ && rm -rf /opt/conda/pkgs/*
+RUN rm -rf /tmp/*
 
 WORKDIR /root
