@@ -1,8 +1,11 @@
 # Docker usage
-Build the docker image with:
+Build the docker images with:
 ```
-build . -t machine-learning
+build . -t machine-learning --target=simple
+build . -t deep-learning --target=deep
 ```
+The target `simple` uses `conda` to install python packages, while `deep` uses `pip` since `tensorflow` v2.0 is not in `conda-forge` yet.
+
 Set some volumes to mount with extra resources
 ```
 ML_RESOURCES=()

@@ -3,6 +3,7 @@ cartopy
 cmocean
 graphviz
 ipython
+jedi=0.17.2
 jupyter
 matplotlib
 mock

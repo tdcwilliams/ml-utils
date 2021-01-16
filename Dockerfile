@@ -51,7 +51,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86
  && echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc \
  && echo "conda activate base" >> ~/.bashrc \
  && conda update -yq conda \
- && conda install -c conda-forge --file /tmp/requirements.txt \
+ && conda install -y -c conda-forge --file /tmp/requirements.txt \
  && /opt/conda/bin/conda clean -a \
  && rm -rf $HOME/.cache/yarn \
  && rm -rf /opt/conda/pkgs/*
@@ -65,12 +65,9 @@ RUN wget https://bootstrap.pypa.io/get-pip.py \
 &&  pip install --upgrade pip
 RUN pip install \
       beautifulsoup4 \
-      cython \
-      dlib \
       graphviz \
       imutils \
-      ipython \
-      jupyter \
+      jedi=0.17.2 \
       matplotlib \
       mock \
       nose \
@@ -92,6 +89,8 @@ RUN pip install \
 RUN pip install \
       cartopy \
       cmocean \
+      ipython \
+      jupyter \
       nc-time-axis \
       netCDF4 \
       shapely --no-binary shapely \
