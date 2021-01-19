@@ -2,6 +2,7 @@ beautifulsoup4
 cartopy
 cmocean
 graphviz
+python-graphviz
 ipython
 jedi=0.17.2
 jupyter
