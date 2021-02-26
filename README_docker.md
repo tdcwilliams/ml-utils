@@ -26,6 +26,7 @@ docker create -it \
     --cpus 4 \
     --name=machine-learning machine-learning
 ```
+Can use eg `9999:9999` if `8888:8888` is taken.
 
 Start container with:
 ```
@@ -35,7 +36,7 @@ Launch notebook with:
 ```
 jupyter-notebook --ip=0.0.0.0 --allow-root &
 ```
-and paste the last URL printed into a web browser.
+and paste the last URL printed into a web browser. Add `--port 9999` if not using `8888`.
 
 # Convert docker image to singularity image file
 1. Archive docker image
