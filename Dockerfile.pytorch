@@ -81,6 +81,8 @@ RUN pip install \
       netCDF4 \
       pytorch-forecasting \
       shapely --no-binary shapely \
+      sktime \
+      sktime-dl \
       xgboost
 #RUN rm -rf /tmp/*
 WORKDIR /root
