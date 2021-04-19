@@ -48,6 +48,7 @@ RUN wget https://bootstrap.pypa.io/get-pip.py \
 &&  pip install --upgrade pip
 RUN pip install \
       beautifulsoup4 \
+      cirq \
       graphviz \
       imutils \
       jedi==0.17.2 \
@@ -70,7 +71,8 @@ RUN pip install \
       statsmodels \
       torch==1.8 \
       torchaudio \
-      torchvision
+      torchvision \
+      qiskit
 RUN pip install \
       cartopy \
       cmocean \
