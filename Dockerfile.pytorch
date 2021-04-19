@@ -68,16 +68,19 @@ RUN pip install \
       seaborn \
       shapely \
       statsmodels \
-      torch \
+      torch==1.8 \
+      torchaudio \
       torchvision
 RUN pip install \
       cartopy \
       cmocean \
+      fastai2 \
       ipython \
       jupyter \
       nc-time-axis \
       netCDF4 \
+      pytorch-forecasting \
       shapely --no-binary shapely \
       xgboost
-RUN rm -rf /tmp/*
+#RUN rm -rf /tmp/*
 WORKDIR /root
