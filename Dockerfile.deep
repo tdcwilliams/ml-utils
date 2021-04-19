@@ -48,6 +48,7 @@ RUN wget https://bootstrap.pypa.io/get-pip.py \
 &&  pip install --upgrade pip
 RUN pip install \
       beautifulsoup4 \
+      cirq \
       graphviz \
       imutils \
       jedi==0.17.2 \
@@ -67,8 +68,11 @@ RUN pip install \
       scikit-learn \
       seaborn \
       shapely \
+      sktime \
+      sktime-dl \
       statsmodels \
-      tensorflow==2.0.0
+      tensorflow==2.4.0 \
+      qiskit
 RUN pip install \
       cartopy \
       cmocean \
