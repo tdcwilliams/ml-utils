@@ -1,8 +1,11 @@
 # Docker usage
-Build the docker image with:
+Build the docker images with:
 ```
-build . -t machine-learning
+build . -t machine-learning --target=simple
+build . -t deep-learning --target=deep
 ```
+The target `simple` uses `conda` to install python packages, while `deep` uses `pip` since `tensorflow` v2.0 is not in `conda-forge` yet.
+
 Set some volumes to mount with extra resources
 ```
 ML_RESOURCES=()
@@ -23,6 +26,7 @@ docker create -it \
     --cpus 4 \
     --name=machine-learning machine-learning
 ```
+Can use eg `9999:9999` if `8888:8888` is taken.
 
 Start container with:
 ```
@@ -32,7 +36,7 @@ Launch notebook with:
 ```
 jupyter-notebook --ip=0.0.0.0 --allow-root &
 ```
-and paste the last URL printed into a web browser.
+and paste the last URL printed into a web browser. Add `--port 9999` if not using `8888`.
 
 # Convert docker image to singularity image file
 1. Archive docker image
