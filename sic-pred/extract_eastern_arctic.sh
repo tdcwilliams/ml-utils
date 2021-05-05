@@ -32,13 +32,14 @@ function process_one_month {
     ncrcat ${lst[@]} -o $d2/${bname}.nc
     # compress
     ncpdq $d2/${bname}.nc -o $outfile
-    #rm -r $d2
+    rm -r $d2
 }
 
 
 osisaf_dir=/cluster/projects/nn2993k/sim/data/OSISAF_ice_conc/polstere/
 new_dir=$USERWORK/OSISAF_ice_conc_eastern_arctic_monthly
-if [ 1 -eq 0 ]
+testing=0
+if [ "$testing" == "1" ]
 then
     # test for one month
     yr=2018
@@ -49,7 +50,7 @@ fi
 
 for yr in 2018 2019 2020 2021
 do
-    for mon in 1 12
+    for mon in $(seq -w 1 12)
     do
         process_one_month
     done
